@@ -1,8 +1,5 @@
 import * as contactsService from "../services/contactsServices.js";
-import {
-  createContactSchema,
-  updateContactSchema,
-} from "../schemas/contactsSchemas.js";
+
 import HttpError from "../helpers/HttpError.js";
 
 import { ctrlWrapper } from "../decorators/ctrlWrapper.js";
@@ -41,16 +38,7 @@ export const deleteContact = ctrlWrapper(async (req, res, next) => {
 });
 
 export const createContact = ctrlWrapper(async (req, res, next) => {
-  const { error, value } = createContactSchema.validate(req.body, {
-    abortEarly: false,
-  });
-
-  if (error) {
-    const messages = error.details.map((detail) => detail.message).join(", ");
-    throw HttpError(400, messages); // Send validation error message
-  }
-
-  const contact = await contactsService.addContact(value);
+  const contact = await contactsService.addContact(req.body);
   res.json({
     status: "success",
     code: 201,
@@ -59,23 +47,14 @@ export const createContact = ctrlWrapper(async (req, res, next) => {
 });
 
 export const updateContact = ctrlWrapper(async (req, res, next) => {
-  const { error, value } = updateContactSchema.validate(req.body, {
-    abortEarly: false,
-  });
-
-  if (error) {
-    const messages = error.details.map((detail) => detail.message).join(", ");
-    throw HttpError(400, messages); // Send validation error message
-  }
-
-  const contact = await contactsService.updateContact(req.params.id, value);
+  const contact = await contactsService.updateContact(req.params.id, req.body);
   if (!contact) {
     throw HttpError(404, "Contact was not found!");
   }
 
   res.json({
     status: "success",
-    code: 201,
+    code: 200,
     data: contact,
   });
 });
